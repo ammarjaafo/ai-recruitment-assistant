@@ -10,3 +10,11 @@ openai
 torch
 joblib
 python-dotenv
+
+deepface
+opencv-python
+moviepy
+librosa
+openai-whisper
+tqdm
+python-multipart

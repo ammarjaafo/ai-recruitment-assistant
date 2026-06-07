@@ -1,9 +1,15 @@
 from typing import Dict
 from uuid import uuid4
+import os
+import shutil
+import uuid
+import traceback
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
+
 
 load_dotenv()
 
@@ -11,6 +17,7 @@ from answer_evaluator import evaluate_answer, improve_answer
 from cv_matching import CVMatcher
 from interview_generator import generate_interview_for_job
 from resume_recommendation import ResumeRecommender
+from behavioral_interview_analyzer import run_behavioral_analysis
 
 
 app = FastAPI(title="AI Recruitment Assistant API")
@@ -60,6 +67,7 @@ def home():
             "/answer/evaluate",
             "/answer/improve",
             "/resume/recommend-category",
+            "/interview/behavioral-analysis",
         ],
     }
 
@@ -186,3 +194,56 @@ def improve(request: ImproveAnswerRequest):
 @app.post("/resume/recommend-category")
 def recommend_resume_category(request: ResumeRecommendationRequest):
     return resume_recommender.predict_top_n(request.cv, request.top_n)
+
+
+@app.post("/interview/behavioral-analysis")
+async def behavioral_interview_analysis(
+    file: UploadFile = File(...),
+    every_n_seconds: int = Form(2)
+):
+    """
+    Upload an interview video and receive behavioral analysis results.
+
+    Returns:
+    - video_behavior_summary
+    - temporal_behavior_summary
+    - behavioral_trend
+    - speech_behavior_summary
+
+    Note:
+    FFmpeg must be installed and available in PATH for speech analysis.
+    """
+    request_id = str(uuid.uuid4())
+    temp_dir = os.path.join("uploads", request_id)
+
+    os.makedirs(temp_dir, exist_ok=True)
+
+    video_path = os.path.join(temp_dir, file.filename)
+
+    try:
+        with open(video_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        result = run_behavioral_analysis(
+            video_path=video_path,
+            every_n_seconds=every_n_seconds,
+            work_dir=temp_dir
+        )
+
+        return JSONResponse(content=result)
+
+    except Exception as exc:
+        error_traceback = traceback.format_exc()
+        print(error_traceback)
+
+        return JSONResponse(
+            status_code=500,
+            content={
+                "status": "failed",
+                "error": str(exc),
+                "traceback": error_traceback
+            }
+        )
+
+    finally:
+        shutil.rmtree(temp_dir, ignore_errors=True)

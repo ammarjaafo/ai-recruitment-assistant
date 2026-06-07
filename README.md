@@ -26,6 +26,25 @@ Generates a stronger interview-ready response based on the candidate's original 
 ### 5. Resume Recommendation
 Predicts the most relevant job categories for a CV using SBERT embeddings + TF-IDF + LinearSVC.
 
+### 6. Behavioral Interview Analyzer
+
+Analyzes interview videos and provides:
+
+- Facial behavioral analysis
+- Temporal behavioral analysis
+- Behavioral trend analysis
+- Speech fluency analysis
+- Speech pace and pause analysis
+
+Input:
+Interview video (.mp4)
+
+Output:
+- Video behavior summary
+- Temporal behavior summary
+- Behavioral trend
+- Speech behavior summary
+
 ## Required Data Files
 Place these files in the project folder:
 

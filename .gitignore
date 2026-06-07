@@ -12,3 +12,14 @@ __pycache__/
 # Dataset files
 Resume.csv
 job_descriptions.csv
+
+uploads/
+frames_temp/
+
+*.wav
+*.mp4
+*.avi
+*.mov
+
+*.pt
+*.h5
